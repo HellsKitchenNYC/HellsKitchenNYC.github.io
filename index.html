@@ -39,6 +39,9 @@
                 text-align: left;
                 padding: 8px;
             }
+            a{
+                padding-left: 5%;
+            }
 
             #Violations tr:nth-child(even){background-color: #f2f2f2}
 
@@ -586,7 +589,15 @@ Observed the top 20% cuisine (the first 17 cuisines) that has the most AVPV, Chi
                 .attr("dx", "-.8em")
                 .attr("dy", ".15em")
                 .attr("transform", "rotate(-90)" );
-
+                
+            svgAVPV.append("text")
+                    .attr("x", (w / 2))             
+                    .attr("y", 20)
+                    .attr("text-anchor", "middle")  
+                    .style("font-size", "16px") 
+                    .style("text-decoration", "underline") 
+                    .style("font-weight", "bold") 
+                    .text("Restaurant Violations by Cuisine Type. Average number of violations per visit: 2.86.");
             })
 
 		
@@ -682,7 +693,16 @@ Observed the top 20% cuisine (the first 17 cuisines) that has the most AVPV, Chi
                             div.transition()		
                                 .duration(500)		
                                 .style("opacity", 0);	
-                        })
+                        });
+                        svgKNN.append("text")
+                            .attr("x", (w / 2))             
+                            .attr("y", 20)
+                            .attr("text-anchor", "middle")  
+                            .style("font-size", "16px") 
+                            .style("text-decoration", "underline") 
+                            .style("font-weight", "bold") 
+                            .text("Map of grade predictions for Chinese restaurants in NYC.");
+
                  });
               //  })
                });
@@ -782,7 +802,10 @@ Observed the top 20% cuisine (the first 17 cuisines) that has the most AVPV, Chi
             <h2>Machine Learning: AVPV regression</h2>
         <p>The number of training data is 2120 which contains the latitude, longitude, and AVPV. Based on the these point, we create 64x128 grid to make a dense prediction
 
-The region with the most violation is at the south of Brox, and north of Queens borough. Which is consensus to the prediction result of grade C
+If a newly open or planing to open a restaurant at certain place, one would like to know what is the potential average violations one might get, because it is relevant to the grade. Hovering through the map, one would know the prediction result of any point on the map, which is a good reference for making visit the restaurant at this location or even open one. 
+
+The region with the most violation is at the south of Brox, and north of Queens borough. Which is consensus to the prediction result of grade C.
+
 </p>
             <script type="text/javascript">
                 // D3 code will go here
@@ -828,7 +851,7 @@ The region with the most violation is at the south of Brox, and north of Queens 
                        .enter()
                        .append("path")
                        .attr("d", path)
-                       .style("fill", "#002366");
+                       .style("fill", "#ccc");
                    
                     svgGAUSS.selectAll(".pin")
                         .data(predictData)
@@ -853,6 +876,14 @@ The region with the most violation is at the south of Brox, and north of Queens 
                                 .style("opacity", 0);	
                         })
                         .style("opacity", 0);
+                        svgGAUSS.append("text")
+                            .attr("x", (w / 2))             
+                            .attr("y", 20)
+                            .attr("text-anchor", "middle")  
+                            .style("font-size", "16px") 
+                            .style("text-decoration", "underline") 
+                            .style("font-weight", "bold") 
+                            .text("AVPV prediction");
                  });
               //  })
                });
@@ -988,11 +1019,22 @@ The region with the most violation is at the south of Brox, and north of Queens 
                     .attr("text-anchor", "middle")  
                     .attr("transform", "translate("+ (padding) +","+(h/2)+")rotate(-90)")  
                     .text("active rat signs/total inspections");
-                    });
+        svgRatio.append("text")
+                            .attr("x", (w / 2))             
+                            .attr("y", 20)
+                            .attr("text-anchor", "middle")  
+                            .style("font-size", "16px") 
+                            .style("text-decoration", "underline") 
+                            .style("font-weight", "bold")
+                            .style("padding-left","50px")
+                            .text("Ratio of active rat signs versus average score in each zip code");           
+        
+        });
+        
                
     </script>
         </div>
-        <div id="CorrelationScoreVSRat">
+        <!--<div id="CorrelationScoreVSRat">
     <h2>Average score as a function of the number of active ratsigns in each zip code</h2>
     <script type="text/javascript">
 
@@ -1106,7 +1148,7 @@ The region with the most violation is at the south of Brox, and north of Queens 
                     .attr("transform", "translate("+ (padding) +","+(h/2)+")rotate(-90)")  
                     .text("Active rat signs");
                     });
-    </script>
+    </script>-->
 
      
     </body>
