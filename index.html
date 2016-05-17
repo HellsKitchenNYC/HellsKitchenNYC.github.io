@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Hell's Kitchen</title>
+        <script type="text/javascript" src="d3.js"></script>
+        <style type="text/css">
+            
+			*{
+				color: #333333; 
+                font-family: "Helvetica Neue",Arial,sans-serif;
+			}
+            div.tooltip {	
+                position: absolute;			
+                text-align: center;			
+                width: 80px;					
+                height: 50px;					
+                padding: 2px;				
+                font: 12px sans-serif;		
+                background: lightsteelblue;	
+                border: 0px;		
+                border-radius: 8px;			
+                pointer-events: none;			
+            }
+          path {
+              stroke: gray;
+              stroke-width: 1px;
+              stroke-linejoin: round;
+              stroke-linecap: round;
+            }
+          #Violations {
+                font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+                border-collapse: collapse;
+                width: 900px;
+            }
+
+            #Violations td, #Vioalations th {
+                border: 1px solid #ddd;
+                text-align: left;
+                padding: 8px;
+            }
+
+            #Violations tr:nth-child(even){background-color: #f2f2f2}
+
+            #Violations tr:hover {background-color: #ddd;}
+
+            #Violations th {
+                padding-top: 12px;
+                padding-bottom: 12px;
+                background-color: #4CAF50;
+                color: white;
+            }
+            #Table {
+                padding:3%;
+            }
+            
+          .axis path,
+          .axis line {
+                fill: none;
+                stroke: gray;
+                shape-rendering: crispEdges;
+          }
+
+          .axis text {
+                font-family: sans-serif;
+                font-size: 11px;
+          }
+          p { 
+              color: #333333; 
+              font-family: "Helvetica Neue",Arial,sans-serif; 
+              font-size: 16px; 
+              font-weight: 300; 
+              line-height: 1.5625; 
+              margin-bottom: 15px;
+              padding-left: 5%;
+              padding-right:5%;
+          }
+          h2{
+                padding-left: 3%;
+          }
+        li{
+            font-weight: bold;
+            margin-left:6%;
+        }
+        #Table{
+            padding-left:15%;
+            padding-right:15%;
+        }
+        h3{
+            padding-left: 5%;
+        }
+		</style>
+    </head>
+    <body>
+        <h1>New York City's dirtiest restaurants</h1>
+        <div id="motivation">
+            <h2>Introduction</h2>
+            <p>
+                In this project, we hope to find the correlation between sanitary condition of a restaurant in New York City and its environment. Based on restaurant inspections and rodent inspections, which represent the sanitary condition of the surrounding area. Then, we could perform machine learning algorithm to predict the sanitary condition of a restaurant or environment when either dataset is missing. However, the invetigation showed no correlation between the rodent inspection dataset and restaurant dataset. We, then, expect to based on the sanitary dataset of restaurants to build model that predict the sanitary condition of a restaurant which not included in the dataset.
+
+                </p>
+             <a href="http://nbviewer.jupyter.org/github/skorrijul/skorrijul.github.io/blob/master/ExplainerNotebook/Explainer%20Notebook.ipynb">Here is a link to the explainer notebook.</a>
+            <br/>
+            <a href="https://data.cityofnewyork.us/api/views/xx67-kt59/rows.csv?accessType=DOWNLOAD">
+                
+            Here is a link to download the restaurant inspection dataset.
+            
+            </a>
+            <br/>
+            <a href="https://data.cityofnewyork.us/api/views/p937-wjvj/rows.csv?accessType=DOWNLOAD">
+                
+            Here is a link to download the rodent inspection dataset.
+            
+            </a>
+            </div>
+        <div id="introduction">
+            <h3>Introduction of datasets</h3>
+            <p>We aquired the two following data sets:</p>
+            <ul>
+              <li>Restaurant Inspection</li>          
+            <p>
+
+               In July 2010, the Health Department began requiring restaurants in all five boroughs (Manhattan, Bronx, Brooklyn, Queens and Staten Islands) to post letter grades summarizing their sanitary inspection score. <br/>
+                The purposes of the score is to inform the public about a restaurant’s sanitary condition; to improve the sanitary condition and food safety in restaurants.
+        <br/>
+                The data set contains information about the Health Department's inspections of New York's 24.000 restaurants. Some of the most important variables are: Name, Score, Grade, Violation Description and Address.
+                </p>
+                <li>Rodent Inspection</li>          
+            <p>
+Conducted by Department of Health and Mental Hygiene, and the earliest data can back to 2009.
+
+                </p>
+        
+        </ul>
+        
+        
+        </div>
+         <div id="RestaurantInspectionExplained">
+            <h2>How the restaurant inspections work</h2>
+             <img src="Grades.png" alt="Mountain View" style="padding-left:5%;">
+            <p>
+               The restaurant being inspected gets a score corresponding to the violations registerd during the inspection. Violations are classified as "critical" or "general". As explained in the image above critical violations carry more points. Critical violations are more likely than general ones to contribute to food-borne illnesses. There are some critical violations that are thought to pose an immediate health threat. These critical violations carry the most points and are further classified as "public health hazards". If a restaurant does not correct a public health hazard the Health Department may close the restaurant immediately. Finally the sum of the points carried by the violations results in a grade. The restaurant gets an A if the final score is from 0 to 13, a B if the score is from 14 to 27 and a C if the score is higher than 27. In the table below the ten most common violations can be viewed. The table also shows the type of the violations and how often each violation was recorded from 2013-2016.
+
+                </p>
+            </div>
+                <div id="Table">
+                
+          <table id="Violations">
+  <tr>
+    <th>Violation</th>
+    <th>Count</th>
+    <th>Type</th>
+  </tr>
+  <tr>
+    <td>Facility not vermin proof. Harborage or conditions conducive to attracting vermin to the premises and/or allowing vermin to exist.</td>
+
+<td>42337</td>
+<td>General</td>
+      
+  </tr>
+  <tr>
+<td>Cold food item held above 41º F (smoked fish and reduced oxygen packaged foods above 38ºF) except during necessary preparation.</td>
+
+<td>35096</td>
+ <td>Public health hazard</td>
+  </tr>
+  <tr>
+    
+<td>Evidence of mice or live mice present in facility's food and/or non-food areas.</td>
+
+<td>31491</td>
+      <td>Critical</td>
+  </tr>
+  <tr>
+<td>Food contact surface not properly washed, rinsed and sanitized after each use and following any activity when contamination may have occurred.</td>
+
+<td>27330</td>
+      <td>Critical</td>
+  </tr>
+  <tr>
+<td>Food not protected from potential source of contamination during storage, preparation, transportation, display or service.</td>
+
+<td>24949</td>
+      <td>Critical</td>
+  </tr>
+      <tr><td>Plumbing not properly installed or maintained; anti-siphonage or backflow prevention device not provided where required; equipment or floor not properly drained; sewage disposal system in disrepair or not functioning properly.</td>
+
+    <td>23847</td>
+      <td>General</td>
+  </tr>
+  <tr>
+<td>Hot food item not held at or above 140ºF</td> <td>21455</td>
+      <td>Public health hazard</td>
+  </tr>
+  <tr>
+    
+<td>Filth flies or food/refuse/sewage-associated (FRSA) flies present in facilitys food and/or non-food areas. Filth flies include house flies, little house flies, blow flies, bottle flies and flesh flies. Food/refuse/sewage-associated flies include fruit flies, drain flies and Phorid flies.</td>
+
+<td>18997</td>
+    <td>Critical</td>         
+</tr>
+  <tr>
+<td>Raw, cooked or prepared food is adulterated, contaminated, cross-contaminated, or not discarded in accordance with HACCP plan.</td>
+
+<td>11192</td>
+      <td>Public health hazard</td>
+  </tr>
+  <tr>
+
+<td>Live roaches present in facility's food and/or non-food areas.</td>
+
+<td>10969</td>
+<td>Critical</td>
+  </tr>
+  <tr>
+<!--
+<td>Sanitized equipment or utensil, including in-use food dispensing utensil, improperly used or stored.</td>
+
+<td>10395</td>
+  </tr>
+  <tr>
+
+<td>Wiping cloths soiled or not stored in sanitizing solution.</td>
+
+<td>8491</td>
+  </tr>
+  <tr>
+
+<td>Personal cleanliness inadequate. Outer garment soiled with possible contaminant.  Effective hair restraint not worn in an area where food is prepared.</td>
+
+<td>8396</td>
+  </tr>
+  <tr>
+
+<td>Food Protection Certificate not held by supervisor of food operations.</td>
+
+<td>7991</td>
+  </tr>
+  <tr>
+
+<td>Proper sanitization not provided for utensil ware washing operation.</td>
+
+<td>7049</td>
+  </tr>
+  <tr>
+
+<td>Food contact surface not properly maintained.</td>
+
+<td>5221</td>
+  </tr>
+  <tr>
+
+<td>Smoke free workplace smoking policy inadequate, not posted, not provided to employees.</td>
+
+<td>5214</td>
+  </tr>
+  <tr>
+
+<td>Pesticide use not in accordance with label or applicable laws. Prohibited chemical used/stored. Open bait station used.</td>
+
+<td>4895</td>
+  </tr>
+  <tr>
+<td>Appropriately scaled metal stem-type thermometer or thermocouple not provided or used to evaluate temperatures of potentially hazardous foods during cooking, cooling, reheating and holding.</td>
+
+<td>4619</td>
+  </tr>-->
+</table>
+        </div>
+                </div>
+        <div id="PieAbove100">
+            <h2>Number of restaurants of cuisines with more than a hundred restaurants</h2>
+            <p>There are 24861 restaurants that have been inspected regualarly since 2013. The restaurants are catagorized depending on their cuisine type. There are 84 different cusine types in the data set and to get a sense of the distribution we plot the distribution as pie charts. Since the majority of cuisines have less than a 100 restaurants plotting all cuisine types on one chart would result in a chart with micro sized slices. This is why first we plot a pie chart showing the number of restaurants of each cuisine type, where the cusine types with less than a hundred restaurants are plotted as one slice. This is the dark blue slice on the pie plot below. To see what cuisine type and the number of restaurants of that cusisine each slice represents please hover the slice with the mouse. </p>
+            <script type="text/javascript">
+
+                d3.text('NumberOfCuisinesAbove100.csv', function(error, _data){
+                    if (error) {  //If error is not null, something went wrong.
+                        console.log(error);  //Log the error.
+                    } 
+                    else {      //The file loaded correctly
+                        var CuisineData = d3.csv.parseRows(_data);
+                    }
+                var values = [];
+                var labels = [];
+                var dataset = Data();
+                console.log(values);
+                //Width and height
+                var w = 700;
+                var h = 700;
+
+                var outerRadius = w / 2;
+                var innerRadius = w / 3;
+                var padding = 30;
+                var arc = d3.svg.arc()
+                                .innerRadius(innerRadius-padding)
+                                .outerRadius(outerRadius-padding);
+
+                var pie = d3.layout.pie();
+
+                //Easy colors accessible via a 10-step ordinal scale
+                var color = d3.scale.ordinal()
+	                   .domain([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36])
+	                   .range(["#CF8F95", "#6843C5", "#B55A23", "#F7FB9B", "#0C4880", "#D4F649", "#BA10DE", "#694B46", "#F3EEF7", "#AF4F7C", "#F51EB5", "#77F98C", "#7E6CAA", "#29E07D", "#82CC14", "#809AF5", "#F7DE05", "#B8314E", "#C77A7F", "#7F14C3", "#9542F3", "#8EA6DB", "#B84FA9", "#D60407", "#4876C3",
+"#969D98", "#116C74", "#83CC26", "#50D55D", "#D965F3", "#899172", "#A8415B", "#5DF1A2", "#802567", "#331991", "#C2A532"]);
+
+                //Create SVG element
+                var svg = d3.select("#PieAbove100")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+
+                //Set up groups
+                var arcs = svg.selectAll("g.arc")
+                              .data(pie(values))
+                              .enter()
+                              .append("g")
+                              .attr("class", "arc")
+                              .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+
+                //Draw arc paths
+                var div = d3.select("body").append("div")	
+                    .attr("class", "tooltip")				
+                    .style("opacity", 0);
+
+                arcs.append("path")
+                    .attr("fill", function(d, i) {
+                        return color(i);
+                    })
+                    .attr("d", arc)
+                    .on("mouseover", function(d,i) {		
+                        div.transition()		
+                            .duration(200)		
+                            .style("opacity", .9);		
+                        div.html( labels[i]+ "<br/>"  + values[i])	
+                            .style("left", (d3.event.pageX) + "px")		
+                            .style("top", (d3.event.pageY - 28) + "px");	
+                    })					
+                    .on("mouseout", function(d) {		
+                        div.transition()		
+                            .duration(500)		
+                            .style("opacity", 0);	
+                    });
+					
+                function Data (){
+                    var list = []
+
+                    for (i = 0; i < 36; i++) {
+                        list.push({label:CuisineData[i][0],value:parseFloat(CuisineData[i][2])});
+                        values.push(parseFloat(CuisineData[i][1]));
+                        labels.push(CuisineData[i][0]);
+                    }
+                    console.log(list);
+                    return list;
+                    } 
+                    svg.append("text")
+                    .attr("x", (w / 2))             
+                    .attr("y", 20)
+                    .attr("text-anchor", "middle")  
+                    .style("font-size", "16px") 
+                    .style("text-decoration", "underline") 
+                    .style("font-weight", "bold") 
+                    .text("Cuisines with more than a hundred restaurants");
+                });
+
+            </script>
+        </div>
+               <div id="PieBelow100">
+            <h2>Number of restaurants of cuisines that have less than a hundred restaurants</h2>
+                   <p>As we can see on the pie chart above the American cuisine has the greatest number of restaurants in New York City. The New York City Health Department has inspected 6077 American restaurants regularly since 2013. The runner up is the Chinese cuisine with 2395 restaurants. The fact that there are so many Chinese restaurants was one of the reasons we chose to do a further analysis on the Chinese restaurants in NYC.</p>
+        <br/>
+        <p>On the pie chart below we plot the number restaurants of cuisines that have less than a 100 restaurants. These restaurants are of little importance to us since there are so few of each cuisine type.
+                   
+                   </p>
+            <script type="text/javascript">
+
+                d3.text('NumberOfCuisinesBelow100.csv', function(error, _data){
+                    if (error) {  //If error is not null, something went wrong.
+                        console.log(error);  //Log the error.
+                    } 
+                    else {      //The file loaded correctly
+                        var CuisineData = d3.csv.parseRows(_data);
+                    }
+                var values = [];
+                var labels = [];
+                var dataset = Data();
+                console.log(values);
+                //Width and height
+                var w = 700;
+                var h = 700;
+                var padding = 30;
+                var outerRadius = w / 2;
+                var innerRadius = w / 3;
+                var arc = d3.svg.arc()
+                                .innerRadius(innerRadius-padding)
+                                .outerRadius(outerRadius-padding);
+
+                var pie = d3.layout.pie();
+
+                //Easy colors accessible via a 10-step ordinal scale
+                var color = d3.scale.ordinal()
+	                   .domain([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49,])
+	                   .range([ "#8EBCF0", "#85E779", "#909C5F", "#49353C", "#7FE152", "#4E1FA1", "#026EAD", "#73D103", "#14D590", "#200126", "#47456F", "#661D5B", "#ADF8FF", "#C0395D",
+"#A7EA81", "#1C852F", "#58666C", "#209299", "#1695FF", "#2A7150", "#36DBCF", "#B1818E", "#DAF7C9", "#0EF93E", "#96908E", "#0B5D72", "#D2353C", "#416383", "#C82B25", "#ABC4B4", "#2C08A7", "#A79DDD", "#91E056", "#42E6D1", "#C8C9C8", "#EF5E7F", "#517FF4", "#C95AAB", "#0EDF5B",
+"#023DB0", "#6A0B87", "#BE92D8", "#691C4C", "#85A540", "#05243E", "#498450", "#C1F53C", "#EA607B"]);
+
+                //Create SVG element
+                var svg = d3.select("#PieBelow100")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+
+                //Set up groups
+                var arcs = svg.selectAll("g.arc")
+                              .data(pie(values))
+                              .enter()
+                              .append("g")
+                              .attr("class", "arc")
+                              .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+
+                //Draw arc paths
+                var div = d3.select("body").append("div")	
+                    .attr("class", "tooltip")				
+                    .style("opacity", 0);
+
+                arcs.append("path")
+                    .attr("fill", function(d, i) {
+                        return color(i);
+                    })
+                    .attr("d", arc)
+                    .on("mouseover", function(d,i) {		
+                        div.transition()		
+                            .duration(200)		
+                            .style("opacity", .9);		
+                        div.html( labels[i]+ "<br/>"  + values[i])	
+                            .style("left", (d3.event.pageX) + "px")		
+                            .style("top", (d3.event.pageY - 28) + "px");	
+                    })					
+                    .on("mouseout", function(d) {		
+                        div.transition()		
+                            .duration(500)		
+                            .style("opacity", 0);	
+                    });
+					
+                function Data (){
+                    var list = []
+
+                    for (i = 0; i < 49; i++) {
+                        list.push({label:CuisineData[i][0],value:parseFloat(CuisineData[i][2])});
+                        values.push(parseFloat(CuisineData[i][1]));
+                        labels.push(CuisineData[i][0]);
+                    }
+                    console.log(list);
+                    return list;
+                    } 
+               svg.append("text")
+                    .attr("x", (w / 2))             
+                    .attr("y", 20)
+                    .attr("text-anchor", "middle")  
+                    .style("font-size", "16px") 
+                    .style("text-decoration", "underline") 
+                    .style("font-weight", "bold") 
+                    .text("Cuisines with less than a hundred restaurants");
+                });
+                
+            </script>
+        </div>
+    <div id="AVPVbarchart">
+        <h2>AVPV barchart</h2>
+        <p style="padding-bottom:0;">
+        Average violation per visit (AVPV): summing up total violations of restaurants in same type of cuisine and divide by the total number of inspection visit.
+In this barchart, we show difference of each cuisine comparing to the mean of AVPV. 
+Observed the top 20% cuisine (the first 17 cuisines) that has the most AVPV, Chinese relevant cuisine re-appear for 5 times, it draws our attention that Chinese restaurant tend to have larger probability to be bad sanitary conditions. In machine learning section, we are interested to predict the sanitary indices which are AVPV and grade.
+        
+        </p>
+        
+     <script type="text/javascript">
+
+        //************************GLOBAL VARIABLE*************************
+        // Width and height
+        var w = 1200;
+        var h = 800;
+        var leftmargin = 10
+        var rightmargin = 10
+
+        // Create SVG element 
+        svgAVPV = d3.select("#AVPVbarchart")
+                .append("svg")
+                .attr("width",w)
+                .attr("height",h);
+
+        //************************BAR CHART CREATE************************
+            //Load the barchart data
+            d3.csv("cuisine_barchart.csv", function(error,bardata) {
+                console.log(bardata.length);
+                console.log(bardata);
+
+            // Set scale of the plot
+            var xScale = d3.scale.ordinal() // usually use with data with order
+                           //.domain(d3.extent(data, function(d) { return d.date; }))
+                           .domain(d3.range(bardata.length)) //range function = [0,1,2...,n]
+                           .rangeRoundBands([leftmargin,w-rightmargin], 0.2); 
+                           // Params 1: 
+                           // provide the length of the data, and it calculate the suitable bar width
+                           // (w - 0) / xScale.domain().length
+                           // Params 2: 
+                           // How much percentage of the bar width will be use for spacing
+            min_AVPV = bardata[0].AVPV;
+            max_AVPV = d3.max(bardata, function(d) { return d.AVPV;});
+            console.log(d3.max(bardata, function(d) { return d.AVPV;}));
+
+            var yScale = d3.scale.linear()
+                                 .domain([bardata[0].AVPV, 
+                                          Math.abs(bardata[0].AVPV)])
+                                 .range([-h/4,h/4]);
+
+            var rScale = d3.scale.linear()
+                                 .domain([min_AVPV,max_AVPV])
+                                 .range([44,255]);
+            var gScale = d3.scale.linear()
+                                 .domain([min_AVPV,max_AVPV])
+                                 .range([160,167]);
+            var bScale = d3.scale.linear()
+                                 .domain([min_AVPV,max_AVPV])
+                                 .range([44,120]);
+
+
+
+            // Plot barchart
+            svgAVPV.selectAll("rect")
+                .data(bardata)
+                .enter()
+                .append("rect")
+                .attr("x",function(d,i){
+                    return xScale(i);
+                })
+                .attr("y",function(d) {
+                    if (yScale(d.AVPV) <= 0){
+                        return h/4;}
+                    else {
+                        return h/4 - yScale(d.AVPV);}
+                })
+                .attr("width",xScale.rangeBand())
+                .attr("height", function(d) {
+                    return Math.abs(yScale(d.AVPV));
+                })
+                .attr("fill",function(d){
+                    return "rgb("+ Math.round(rScale(d.AVPV)) +"," + Math.round(gScale(d.AVPV)) +","+ Math.round(bScale(d.AVPV)) +")";
+                });
+
+            // Add difference of AVPV above the bar
+            textpad = 18;
+            svgAVPV.selectAll("text")
+                .data(bardata)
+                .enter()
+                .append("text")
+                .text(function(d){
+                    return parseFloat(Math.round(d.AVPV * 1000) / 1000).toFixed(3);
+                })
+                .attr({
+                    x: function(d,i){return  xScale(i) + xScale.rangeBand() / 2;},
+                    y: function(d){if (yScale(d.AVPV) <= 0){
+                        return h/4 + Math.abs(yScale(d.AVPV)) + textpad;}
+                    else {
+                        return h/4 - yScale(d.AVPV) - textpad;}},
+                    "font-family": "sans-serif",
+                    "font-size":"9px",
+                    fill:"black",
+                    "writing-mode": "tb",
+                    "text-anchor":"middle",
+                    "glyph-orientation-vertical": "0"
+                })
+
+            // set up the xAxis
+            xScale.domain(d3.range(bardata.length));
+            var xAxis = d3.svg.axis()
+                              .scale(xScale)
+                              .tickFormat(function(d) { return bardata[d].CUISINE; })
+                              .orient("bottom");
+
+            svgAVPV.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(-7," + (2*h/4+30) + ")")
+            .call(xAxis)
+            .selectAll("text")  
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+                .attr("transform", "rotate(-90)" );
+
+            })
+
+		
+	  </script>	
+    
+    
+    </div>
+         <div id="KNNChinese">
+            <h2>Hover the map with the mouse pointer to see the grade a Chinese restaurant at that location is most likely to get.</h2>
+             <p>Imagine you have just moved to New York City. To make a living you decide to open a Chinese restaurant but where in the big apple is the best place to do that? Of course there are many different things to take in to account when finding the perfect location for your restaurant. One important thing is how likely it is that your restaurant gets a good grade from the Health Department in the future. This can be determined by looking at what grade restaurants in the neighborhood have gotten in the past.</p>
+             <br/>
+             <p>There are 2312 Chinese restaurants in NYC. We classify each restaurant according to the worst grade it has received since 2013. We take the worst grade because restaurants are given multiple opportunities to improve their grades and most of them eventually receive an A. Thus restaurants that have always been kept clean get classified as the best ones and the other ones have at some point failed to meet the requirements. Now we lay a grid of points over New York City. For each point <em>P</em> on the grid we look at the 10 restaurants that are closest to it. <em>P</em> gets classified in accordance to the class of the majority of its 10 nearest neighbors.</p>
+             <br/>
+             <p>
+                The dots on the map below represent the grade a Chinese restaurant is likely to get in that location. Green represents a grade A, yellow is for a grade B and red is for C. By hovering the mouse pointer over the map the grade of the corresponding dot can be viewed.
+             
+             </p>
+            <script type="text/javascript">
+                // D3 code will go here
+
+                //Width and height
+                var w = 960;
+                var h = 960;
+
+                //Define global data
+                var activerat;
+                var procon;
+
+                //Define map projection
+                var projection = d3.geo.mercator()
+                            .center([-73.94, 40.70])
+                            .scale(75000)
+                            .translate([w/2, h/2]);
+
+                //Define path generator
+                var path = d3.geo.path()
+                             .projection(projection);
+                var div = d3.select("#KNNChinese").append("div")	
+                    .attr("class", "tooltip")				
+                    .style("opacity", 0);
+                //Create SVG element
+                var svgKNN = d3.select("#KNNChinese")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+
+                //Load in rat inspection result data
+               d3.text('ChinesePrediction.csv', function(error, _data){
+                   if (error) throw(error);
+                   var predictData = d3.csv.parseRows(_data);
+                    d3.json("Zipcode_TabulationArea.geojson", function(error,json) {
+                    if (error) throw(error);
+                        console.log(predictData);
+                  
+                    svgKNN.selectAll("path")
+                       .data(json.features)
+                       .enter()
+                       .append("path")
+                       .attr("d", path)
+                       .style("fill", "#ccc");
+                   
+                    svgKNN.selectAll(".pin")
+                        .data(predictData)
+                        .enter()
+                        .append("circle", ".pin")
+                        .attr("r", 4)
+                        .attr("transform", function(d,i) {
+                              return "translate(" + projection([
+                                d[0],d[1]
+                              ]) + ")";
+                        })
+                        .style("fill", function(d){
+                            if(d[2] == 'A'){
+                                return "rgba(136,193,0,1)";
+                            }
+                            if(d[2] == 'B'){
+                                return "rgba(250,190,40,0.8)";
+                            }
+                            if(d[2] == 'C'){
+                                return "rgba(255,0,60,0.3)";
+                            }
+                        
+                        })
+                        .on("mouseover", function(d,i) {		
+                            div.transition()		
+                                .duration(200)		
+                                .style("opacity", .9);		
+                            div.html( "<br/>Likely grade:"  + d[2])	
+                                .style("left", (d3.event.pageX) + "px")		
+                                .style("top", (d3.event.pageY - 28) + "px");	
+                        })					
+                        .on("mouseout", function(d) {		
+                            div.transition()		
+                                .duration(500)		
+                                .style("opacity", 0);	
+                        })
+                 });
+              //  })
+               });
+
+            </script>	    
+        </div>
+    
+  <!--  <div id="ActualChinese">
+            <h2>Chinese restaurants used for KNN.</h2>
+            <script type="text/javascript">
+                // D3 code will go here
+
+                //Width and height
+                var w = 960;
+                var h = 960;
+
+                //Define global data
+                var activerat;
+                var procon;
+
+                //Define map projection
+                var projection = d3.geo.mercator()
+                            .center([-73.94, 40.70])
+                            .scale(75000)
+                            .translate([w/2, h/2]);
+
+                //Define path generator
+                var path = d3.geo.path()
+                             .projection(projection);
+                var div = d3.select("#ActualChinese").append("div")	
+                    .attr("class", "tooltip")				
+                    .style("opacity", 0);
+                //Create SVG element
+                var svgActual = d3.select("#ActualChinese")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+
+                //Load in rat inspection result data
+               d3.text('ActualChiRestaurantLocation.csv', function(error, _data){
+                   if (error) throw(error);
+                   var predictData = d3.csv.parseRows(_data);
+                    d3.json("Zipcode_TabulationArea.geojson", function(error,json) {
+                    if (error) throw(error);
+                        console.log(predictData);
+                  
+                    svgActual.selectAll("path")
+                       .data(json.features)
+                       .enter()
+                       .append("path")
+                       .attr("d", path)
+                       .style("fill", "#ccc");
+                   
+                    svgActual.selectAll(".pin")
+                        .data(predictData)
+                        .enter()
+                        .append("circle", ".pin")
+                        .attr("r", 4)
+                        .attr("transform", function(d,i) {
+                              return "translate(" + projection([
+                                d[0],d[1]
+                              ]) + ")";
+                        })
+                        .style("fill", function(d){
+                            if(d[2] == 'A'){
+                                return "rgba(136,193,0,1)";
+                            }
+                            if(d[2] == 'B'){
+                                return "rgba(250,190,40,0.8)";
+                            }
+                            if(d[2] == 'C'){
+                                return "rgba(255,0,60,0.3)";
+                            }
+                        
+                        })
+                        .on("mouseover", function(d,i) {		
+                            div.transition()		
+                                .duration(200)		
+                                .style("opacity", .9);		
+                            div.html( "<br/>Grade:"  + d[2] + d[0] + "," + d[1] )	
+                                .style("left", (d3.event.pageX) + "px")		
+                                .style("top", (d3.event.pageY - 28) + "px");	
+                        })					
+                        .on("mouseout", function(d) {		
+                            div.transition()		
+                                .duration(500)		
+                                .style("opacity", 0);	
+                        })
+                 });
+              //  })
+               });
+
+            </script>	    
+        </div>-->
+        
+    <div id="GaussianProcessRegressionChinese">
+            <h2>Machine Learning: AVPV regression</h2>
+        <p>The number of training data is 2120 which contains the latitude, longitude, and AVPV. Based on the these point, we create 64x128 grid to make a dense prediction
+
+The region with the most violation is at the south of Brox, and north of Queens borough. Which is consensus to the prediction result of grade C
+</p>
+            <script type="text/javascript">
+                // D3 code will go here
+
+                //Width and height
+                var w = 960;
+                var h = 960;
+
+                //Define global data
+                var activerat;
+                var procon;
+
+                //Define map projection
+                var projection = d3.geo.mercator()
+                            .center([-73.94, 40.70])
+                            .scale(75000)
+                            .translate([w/2, h/2]);
+
+                //Define path generator
+                var path = d3.geo.path()
+                             .projection(projection);
+                
+                var div = d3.select("#GaussianProcessRegressionChinese").append("div")	
+                    .attr("class", "tooltip")				
+                    .style("opacity", 0);
+                //Create SVG element
+                
+                var svgGAUSS = d3.select("#GaussianProcessRegressionChinese")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+
+                //Load in rat inspection result data
+               d3.text('AVPV_predict.csv', function(error, _data){
+                   if (error) throw(error);
+                   var predictData = d3.csv.parseRows(_data);
+                    d3.json("Zipcode_TabulationArea.geojson", function(error,json) {
+                    if (error) throw(error);
+                        console.log(predictData);
+                  
+                    svgGAUSS.selectAll("path")
+                       .data(json.features)
+                       .enter()
+                       .append("path")
+                       .attr("d", path)
+                       .style("fill", "#002366");
+                   
+                    svgGAUSS.selectAll(".pin")
+                        .data(predictData)
+                        .enter().append("circle", ".pin")
+                        .attr("r", 4)
+                        .attr("transform", function(d,i) {
+                              return "translate(" + projection([
+                                d[1],d[0]
+                              ]) + ")";
+                        })
+                        .on("mouseover", function(d,i) {		
+                            div.transition()		
+                                .duration(200)		
+                                .style("opacity", .9);		
+                            div.html( "<br/>AVPV:"  + d[2])	
+                                .style("left", (d3.event.pageX) + "px")		
+                                .style("top", (d3.event.pageY - 28) + "px");	
+                        })					
+                        .on("mouseout", function(d) {		
+                            div.transition()		
+                                .duration(500)		
+                                .style("opacity", 0);	
+                        })
+                        .style("opacity", 0);
+                 });
+              //  })
+               });
+
+            </script>	    
+        </div>
+        <div id="CorrelationScoreVSRatRatio">
+    <h2>Average score as a function of the ratio between active rat signs and the total number of inspections in each zip code</h2>
+            <p>We tried to find a correlation between active rat signs and the average score in each zip code. The y-axis represent the ratio of active rat sign to total number of inspection, and the x-axis is the average score of corresponding zip code. The distribution of xy shows no correlation between these two parameters, and thus they are uncorrelated. </p>
+    <script type="text/javascript">
+
+
+     /*   d3.csv("CrimeData.csv", function(error, data) {
+
+            if (error) {  //If error is not null, something went wrong.
+                console.log(error);  //Log the error.
+            } else {      //The file loaded correctly
+                dataSet = d3.csv.parseRows(_data);
+                console.log(_data);
+                console.log(scatterdata);
+            }
+
+});*/
+        var yScale;
+        var scatterdata;
+        var padding = 20;
+        var svg;
+        d3.text('scoreVSrat.csv', function(error, _data){
+            if (error) {  //If error is not null, something went wrong.
+                console.log(error);  //Log the error.
+            } 
+            else {      //The file loaded correctly
+                var scatterdata = d3.csv.parseRows(_data);
+            }
+        
+                var w = 500;
+                var h = 500;
+                var twenty15 = false;
+                
+                var xScale = d3.scale.linear()
+								 .domain([10, 20])
+								 .range([padding*4, 500-padding*4]);
+
+                yScale = d3.scale.linear()
+								 .domain([0, 1])
+								 .range([500-padding*4,padding*4]);
+                
+                var radScale = d3.scale.linear()
+								 .domain([0, d3.max(scatterdata, function(d) { return d[1]; })])
+								 .range([2, 5]);
+                
+                var xAxis = d3.svg.axis()
+							  .scale(xScale)
+							  .orient("bottom")
+							  .ticks(5);
+
+			     //Define Y axis
+			     var yAxis = d3.svg.axis()
+							  .scale(yScale)
+							  .orient("left")
+							  .ticks(5);
+
+                //Create SVG element
+                svgRatio = d3.select("#CorrelationScoreVSRatRatio")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+                var tooltip = d3.select("#E").append("div")
+                    .attr("class", "tooltip")
+                    .style("opacity", 0);
+            
+                svgRatio.selectAll("circle")
+                   .data(scatterdata)
+                   .enter()
+                   .append("circle")
+                   .attr("cx", function(d) {
+                        return xScale(d[1]);
+                   })
+                   .attr("cy", function(d) {
+                        return yScale(d[3]);
+                   })
+                   .attr("r", function(d) {
+                        return 3;
+                   })
+                   .on("mouseover", function(d) {
+                        tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                        tooltip.html(d[0] + "<br/> (" + d[1] + ", " + d[3] + ")")
+                        .style("left", (d3.event.pageX + 5) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", function(d) {
+                        tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                    });
+            
+                
+             /*   svgRatio.selectAll("text")
+                   .data(scatterdata)
+                   .enter()
+                   .append("text")
+                   .text(function(d) {
+                        return d[0];
+                   })
+                   .attr("x", function(d) {
+                        return xScale(d[1]);
+                   })
+                   .attr("y", function(d) {
+                        return yScale(d[3]);
+                   })
+                   .attr("font-family", "sans-serif")
+                   .attr("font-size", "11px")
+                   .attr("fill", "red");*/
+
+                svgRatio.append("g")
+                        .attr("class", "axis")
+                        .attr("transform", "translate(0," + (h - padding*4) + ")")
+                        .call(xAxis);
+                svgRatio.append("text")      // text label for the x axis
+                        .attr("x", 265 )
+                        .attr("y",  h-30 )
+                        .style("text-anchor", "middle")
+                        .text("Average grade");
+
+//Create Y axis
+                svgRatio.append("g")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(" + padding*4 + ",0)")
+                    .call(yAxis);
+                svgRatio.append("text")
+                    .attr("text-anchor", "middle")  
+                    .attr("transform", "translate("+ (padding) +","+(h/2)+")rotate(-90)")  
+                    .text("active rat signs/total inspections");
+                    });
+               
+    </script>
+        </div>
+        <div id="CorrelationScoreVSRat">
+    <h2>Average score as a function of the number of active ratsigns in each zip code</h2>
+    <script type="text/javascript">
+
+
+     /*   d3.csv("CrimeData.csv", function(error, data) {
+
+            if (error) {  //If error is not null, something went wrong.
+                console.log(error);  //Log the error.
+            } else {      //The file loaded correctly
+                dataSet = d3.csv.parseRows(_data);
+                console.log(_data);
+                console.log(scatterdata);
+            }
+
+});*/
+        var yScale;
+        var scatterdata;
+        var padding = 20;
+        var svg;
+        d3.text('scoreVSrat.csv', function(error, _data){
+            if (error) {  //If error is not null, something went wrong.
+                console.log(error);  //Log the error.
+            } 
+            else {      //The file loaded correctly
+                var scatterdata = d3.csv.parseRows(_data);
+            }
+        
+                var w = 500;
+                var h = 500;
+                var twenty15 = false;
+                
+                var xScale = d3.scale.linear()
+								 .domain([10, 20])
+								 .range([padding*4, 500-padding*4]);
+
+                yScale = d3.scale.linear()
+								 .domain([0, 5000])
+								 .range([500-padding*4,padding*4]);
+                
+                var radScale = d3.scale.linear()
+								 .domain([0, d3.max(scatterdata, function(d) { return d[1]; })])
+								 .range([2, 5]);
+                
+                var xAxis = d3.svg.axis()
+							  .scale(xScale)
+							  .orient("bottom")
+							  .ticks(5);
+
+			     //Define Y axis
+			     var yAxis = d3.svg.axis()
+							  .scale(yScale)
+							  .orient("left")
+							  .ticks(5);
+
+                //Create SVG element
+                svgRat = d3.select("#CorrelationScoreVSRat")
+                            .append("svg")
+                            .attr("width", w)
+                            .attr("height", h);
+
+                svgRat.selectAll("circle")
+                   .data(scatterdata)
+                   .enter()
+                   .append("circle")
+                   .attr("cx", function(d) {
+                        return xScale(d[1]);
+                   })
+                   .attr("cy", function(d) {
+                        return yScale(d[2]);
+                   })
+                   .attr("r", function(d) {
+                        return 3;
+                   });
+
+                /*svgRat.selectAll("text")
+                   .data(scatterdata)
+                   .enter()
+                   .append("text")
+                   .text(function(d) {
+                        return d[0];
+                   })
+                   .attr("x", function(d) {
+                        return xScale(d[1]);
+                   })
+                   .attr("y", function(d) {
+                        return yScale(d[3]);
+                   })
+                   .attr("font-family", "sans-serif")
+                   .attr("font-size", "11px")
+                   .attr("fill", "red");*/
+
+                svgRat.append("g")
+                        .attr("class", "axis")
+                        .attr("transform", "translate(0," + (h - padding*4) + ")")
+                        .call(xAxis);
+
+                svgRat.append("text")      // text label for the x axis
+                    .attr("x", 265 )
+                    .attr("y",  h-30 )
+                    .style("text-anchor", "middle")
+                    .text("Average grade")
+                    .attr("fill", "blue");
+//Create Y axis
+                svgRat.append("g")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(" + padding*4 + ",0)")
+                    .call(yAxis);
+            
+                svgRat.append("text")
+                    .attr("text-anchor", "middle")  
+                    .attr("transform", "translate("+ (padding) +","+(h/2)+")rotate(-90)")  
+                    .text("Active rat signs");
+                    });
+    </script>
+
+     
+    </body>
+</html>
